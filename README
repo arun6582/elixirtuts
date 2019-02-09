@@ -23,6 +23,13 @@ Type check methods:
 - is_bitstring
 
 
+Booleans (true/false)
+- Are internally atoms(symbols)
+
+> is boolean(false)  -> true
+> is_atom(true)  -> true
+
+
 Tuple methods:
 > size {1, 2, 3}  -> 2
 - Stored as continous memory
@@ -33,6 +40,8 @@ Tuple methods:
 - Updating tuple is expensive, requires copying the tuple in memory
 > put_elem {1,2,3, :rane, {5,6}}, 3, 10  ->  {1, 2, 3, 10, {5, 6}}
 
+- Good for fixed set of elements
+
 
 List:
 > length [1, 2, 3]  -> 3
@@ -40,7 +49,27 @@ List:
 - Updating is fast, accessing Nth element is slow
 - Accessing first element is fast
 > [head | tail ] = [1, 2, 3, 4, 5, 6, 7]   ->  head = 1 and rest of it is tail
-> length [head | tail]  ->  6
+> length [head | tail]  ->  6  #  head should be a single element, tail must be a list
+
+- Enum and List module provides utilities for Enumerables (doesn't work on tuples)
+> Enum.at [10, 20, 30], 0  ->  10
+> List.flatten [1, 2, [3, 4, [5, 6]], [7]]  ->  [1, 2, 3, 4, 5, 6, 7]
+
+
+Dict:
+- List of Tuples with first element as an atom is represented as a Dict (python like lookup structure)
+> d = [{:a, 1}, {:b, 2}]  ->  [a: 1, b: 2]
+- or
+> d = [a:1, b: 2]  # equivalent to above
+> Keyword.get d, :b  -> 2
+> Keyword.get d, :c  -> nil
+
+- If function takes Dict as last argument
+> if 3 * 2 == 6, [do: "OK"]
+- is same as
+> if 3 * 2 == 6, do: "OK"
+- Side note: which if you want to put brackets like other boring languages
+> if(3 *2  == 6, [do: "OK"])
 
 
 Strings (double quote):
@@ -57,6 +86,9 @@ String interpolation/templating:
 > is_bitstring("hello") -> true
 > bit_size("hello")  -> 40
 
+- Binary representation of string "abc" is
+> "abc" == <<97, 98, 99>>  -> true
+
 
 Char "list" (single quotes)
 
@@ -65,13 +97,19 @@ Char "list" (single quotes)
 > length 'rane'  -> 4
 > length 'hellö' -> 5
 
+> 'abc' == [97, 98, 99]
+- Ascii integer value of letters using ?
+> ?a  ->  97
+- So above can be written as
+> 'abc' == [?a, ?b, ?c]  -> true
 
+- Also, by binary representation of strings concept
+> "abc" == <<?a, ?b, ?c>>
 
-Booleans (true/false)
-- Are internally atoms(symbols)
+- Since these are printable characters, elixir does the conversion of [97, 98, 99] to 'abc' and <<97, 98, 99>> to "abc"
+- this doesn't happen for non-printable ascii codes e.g. [97, 98, 99, 1] and <<97, 98, 99, 1>> have no equivalent string representations
 
-> is boolean(false)  -> true
-> is_atom(true)  -> true
+- NOTE: Unless you want to iterate, do not use single quote strings
 
 
 Functions:
@@ -117,12 +155,89 @@ NOTE: Everything is true except false and nil
 - nil and false are not the same
 > nil == false  -> false
 
-- Comparioson =, !=, ===, !==, <=, >=, < and >
+- Comparison =, !=, ===, !==, <=, >=, < and >
     - === is stict .. e.g. when comparing int and float
     - You can compare between different data types (which is weird, should never be done)
         but number < atom < reference < functions < port < pid < tuple < list
         (reference, port and pid are data types)
 > {1} > 10   ->  true
 > [100] > {5000}  -> true
+
+
+Pattern matching:
+- Too many things are accomplished using pattern matching e.g.
+
+> [first | rest]  = [10, 20, 30, 40, 50]
+> {num, atom, str} = {10, :in_process, "rane"}
+
+- lhs and rhs have to be of same type (list or tuple)
+- number of parameters have to be same on both sides
+- Interesting use is to match function output as :ok or :error e.g.
+
+> {:ok, result} = {:ok, 3}  -> when function given output
+> {:ok, result} = {:error, :bad_input}  ->  when function given error
+
+- String pattern matching
+> [a, b, c] = "ran"  -> a,b,c get ascii codes for 'r', 'a', 'n' respectively
+> <<a, b, c>> = 'ran' -> a,b,c get ascii codes for 'r', 'a', 'n' respectively
+
+To get, first letter of a string:
+> <<a:: integer, b:: binary>> = "rane is cool"  ->  a is ?r and b is "ane is cool"
+
+
+Unicode:
+- A string in Elixir is a binary which is encoded in UTF-8
+
+> size "héllò"
+7 - returns the number of bytes
+
+> String.length "héllò"
+5 - returns the number of characters as perceived by humans
+
+NOTE: Generally, "size" is to be used when length is pre-calculated, "length" is to be used when length is calculated at runtime
+
+- To split string into list of strings
+>  String.codepoints "héllò"  ->  ["h", "é", "l", "l", "ò"]
+
+> << eacute :: utf8, rest :: binary >> = "épa"  # split head and tail
+> eacute  ->  233
+> << eacute :: utf8 >>  -> "é"  # Give utf8 encoded string representation
+> rest -> "pa"
+
+
+Blocks:
+
+- If block:
+
+if <condition> do
+    <expression>
+else
+    <expression>
+end
+
+If case of confusion, just add brackets where needed
+
+Pattern matching:
+- "=" is not a assignment operator but a patten matching operator
+
+> x = 1   ->  Match x to 1
+> ^x = 1  ->  Match "value of x" to 1
+> ^x = 2  -> Gives MatchError, since value of x is not 2
+
+- Basically, this acts as an assertion
+
+- Note: Use underscore to ignore values (just like python)
+> [h | _] = [10, 20, 30, 40]
+
+- Note: Function calls are not allowed on LHS of match
+
+Case:
+- Works like switch case (break if implicit), but pattern matching makes assignments possible
+
+case { 1, 2, 3} do
+{4, 5, 6} -> "This won't match
+{ 1, x, 3} -> "This matches and x is assigned to 2"
+_ -> "This matches all values"
+end
 
 
