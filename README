@@ -1,0 +1,128 @@
+Functional language, awesome concurrency => multi-core and multi-machines
+Bad with string manipulation
+As good as php/python in general efficiency
+
+iex -> elixir interactive mode (like python repl)
+
+Function calls:
+> length('hello rane') -> 10
+> length 'hello rane'  -> 10
+
+Basic types:
+- nil
+- integer, float
+- atom/symbol (must start with colon e.g. :status or :code)
+- list e.g. [1, 2, 3, 4]
+- tuple e.g. {1, 2, 3, 4}
+
+Type check methods:
+- is_atom
+- is_list
+- is_tuple
+- is_binary
+- is_bitstring
+
+
+Tuple methods:
+> size {1, 2, 3}  -> 2
+- Stored as continous memory
+
+- Fast for index access
+> elem {1,2,3, :rane, {5,6}}, 4  ->  {5, 6}
+
+- Updating tuple is expensive, requires copying the tuple in memory
+> put_elem {1,2,3, :rane, {5,6}}, 3, 10  ->  {1, 2, 3, 10, {5, 6}}
+
+
+List:
+> length [1, 2, 3]  -> 3
+- Stored as linked lists
+- Updating is fast, accessing Nth element is slow
+- Accessing first element is fast
+> [head | tail ] = [1, 2, 3, 4, 5, 6, 7]   ->  head = 1 and rest of it is tail
+> length [head | tail]  ->  6
+
+
+Strings (double quote):
+
+String interpolation/templating:
+> name = "rane"
+> "Hello #{name}"
+
+- String are bytes (supports unicode etc)
+> is_binary("hello")  -> true
+> byte_size("hello")  -> 5
+> byte_size("hellö") -> 6
+
+> is_bitstring("hello") -> true
+> bit_size("hello")  -> 40
+
+
+Char "list" (single quotes)
+
+> is_binary('rane')  -> false
+> is_list('rane') -> true
+> length 'rane'  -> 4
+> length 'hellö' -> 5
+
+
+
+Booleans (true/false)
+- Are internally atoms(symbols)
+
+> is boolean(false)  -> true
+> is_atom(true)  -> true
+
+
+Functions:
+- Anonymous functions:
+
+> x = fn(a, b) -> a * b end
+> x.(3, 2) -> 6  # dot operator to call anonymous functions
+
+
+Operators:
+div for integer division
+rem for remainder
++ - / *
+
+- Union ++
+> [1, 2, 3] ++ [3, 4, 5]  -> [1, 2, 3, 3, 4, 5]
+
+- Set Substraction
+> [1, 2, 3, 4] -- [3, 4, 5, 6]  -> [1, 2]
+
+- String Concatenation
+> "Hello" <> " " <> "World"  -> "Hello World"
+
+- Pure Boolean (and or not)
+> true and true  -> true
+> true and not true -> false
+
+- Strictly takes only booleans
+> 1 and true  -> * (BadBooleanError) expected a boolean on left-side of "and", got: 1
+
+> 1/0  -> (ArithmeticError) bad argument in arithmetic expression :erlang./(1, 0)
+> false and 1/0  ->  Like python, if false, leave the other side of AND
+> true or 1/0  -> Like python, is true, leave the other side of OR
+
+- Mixed Boolean (&& || !)
+
+NOTE: Everything is true except false and nil
+> 1 && 3 && 2  ->  2
+> 3 || 1/0  -> 3
+> 0 || 1/0 -> 0
+> nil && 1/0  -> nil
+
+- nil and false are not the same
+> nil == false  -> false
+
+- Comparioson =, !=, ===, !==, <=, >=, < and >
+    - === is stict .. e.g. when comparing int and float
+    - You can compare between different data types (which is weird, should never be done)
+        but number < atom < reference < functions < port < pid < tuple < list
+        (reference, port and pid are data types)
+> {1} > 10   ->  true
+> [100] > {5000}  -> true
+
+
