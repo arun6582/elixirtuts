@@ -207,7 +207,7 @@ NOTE: Generally, "size" is to be used when length is pre-calculated, "length" is
 
 Blocks:
 
-- If block:
+- If block (if - do - else - end):
 
 if <condition> do
     <expression>
@@ -216,6 +216,36 @@ else
 end
 
 If case of confusion, just add brackets where needed
+
+Different ways to frame if/else:
+
+1)
+x = if x > 5 do
+    5
+else
+    10
+end
+
+2)
+x = if x > 5, do: 5
+
+3)
+x = if x > 5, do: 5, else: 10
+
+
+Switch-Case: (cond, do, true, end), break is implicit
+
+cond do
+    x > 5 ->
+        5
+    x > 8 ->
+        8
+    x > 10 ->
+        10
+    true ->
+        100
+end
+
 
 Pattern matching:
 - "=" is not a assignment operator but a patten matching operator
@@ -232,7 +262,8 @@ Pattern matching:
 - Note: Function calls are not allowed on LHS of match
 
 Case:
-- Works like switch case (break if implicit), but pattern matching makes assignments possible
+- Works like switch case (break is implicit), but pattern matching makes assignments possible
+- Different from cond (above), since cond does good-old boolean evaluation, case does pattern matching
 
 case { 1, 2, 3} do
 {4, 5, 6} -> "This won't match
@@ -327,3 +358,19 @@ end
 
 - In case of exception, x and y are nil
 
+
+If-Unless
+
+- unless is if-not (in other languages)
+
+x = if x > 5, do: 5  # make x 5 if its greater than 5
+
+x = unless x > 5, do: 5  # make x 5 if x is not greater than 5
+
+
+Calling function from Erlang
+
+- :<erlang_module>.<function> <params> e.g.
+
+> :lists.flatten [1, 2, [3, 4, [5, 6], 7]]
+> :math.sin :math.pi
