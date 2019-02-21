@@ -1,8 +1,12 @@
+# BASICS
+
 Functional language, awesome concurrency => multi-core and multi-machines
 Bad with string manipulation
 As good as php/python in general efficiency
 
 iex -> elixir interactive mode (like python repl)
+iex help
+> h(List.first)
 
 Function calls:
 > length('hello rane') -> 10
@@ -14,6 +18,9 @@ Basic types:
 - atom/symbol (must start with colon e.g. :status or :code)
 - list e.g. [1, 2, 3, 4]
 - tuple e.g. {1, 2, 3, 4}
+- range 1..10
+- regex ~r{regexp}opts  (PCRE, perl 5 compatible)
+- Binary <<1, 2>>
 
 Type check methods:
 - is_atom
@@ -22,8 +29,8 @@ Type check methods:
 - is_binary
 - is_bitstring
 
-
-Booleans (true/false)
+Booleans (true/false/nil)
+- apart from nil and false, everything else evaluates to true
 - Are internally atoms(symbols)
 
 > is boolean(false)  -> true
@@ -56,11 +63,12 @@ List:
 > List.flatten [1, 2, [3, 4, [5, 6]], [7]]  ->  [1, 2, 3, 4, 5, 6, 7]
 
 
-Dict:
+Keyword Lists: Key-Value pairs (key is neccessarily an atom and not unique):
 - List of Tuples with first element as an atom is represented as a Dict (python like lookup structure)
-> d = [{:a, 1}, {:b, 2}]  ->  [a: 1, b: 2]
+
+> d = [{:a, 1}, {:b, 2}]  ->  [a: 1, b: 2]  # The space after : is required here unlike python
 - or
-> d = [a:1, b: 2]  # equivalent to above
+> d = [a: 1, b: 2]  # equivalent to above
 > Keyword.get d, :b  -> 2
 > Keyword.get d, :c  -> nil
 
@@ -71,6 +79,33 @@ Dict:
 - Side note: which if you want to put brackets like other boring languages
 > if(3 *2  == 6, [do: "OK"])
 
+- Can be used when calling functions e.g.
+> DB.save record, [ {:use_transaction, true}, {:logging, "HIGH"} ]
+OR
+> DB.save record, use_transaction: true, logging: "HIGH"
+
+- These are multi-valued so
+> l = [a: 1, b: 2, a: 3, a: 4]
+> Keyword.get_values l, :a   #-> [1, 3, 4]
+
+Maps (key-value pairs) %{ key => value, key => value }
+
+- Behave like normal python dictionaries (unique keys, all possible types)
+
+> states = %{ "AL" => "Alabama", "WI" => "Wisconsin" }
+> states["AL"]
+
+- If keys are atoms:
+> status = %{:success => 200, :not_found => 404}
+OR
+> status = %{success: 200, not_found: 404}
+
+> status[:success]
+OR
+> status.success
+
+NOTE: Use Keyword lists for parameters, command line options etc. If you need a data
+structure, use Map
 
 Strings (double quote):
 
@@ -129,6 +164,9 @@ rem for remainder
 
 - Set Substraction
 > [1, 2, 3, 4] -- [3, 4, 5, 6]  -> [1, 2]
+
+- In (only on lists, not tuples)
+> 1 in [1, 2, 3, 4]
 
 - String Concatenation
 > "Hello" <> " " <> "World"  -> "Hello World"
@@ -251,7 +289,7 @@ Pattern matching:
 - "=" is not a assignment operator but a patten matching operator
 
 > x = 1   ->  Match x to 1
-> ^x = 1  ->  Match "value of x" to 1
+> ^x = 1  ->  Match "value of x" to 1                       # Pin x and match pattern
 > ^x = 2  -> Gives MatchError, since value of x is not 2
 
 - Basically, this acts as an assertion
@@ -374,3 +412,36 @@ Calling function from Erlang
 
 > :lists.flatten [1, 2, [3, 4, [5, 6], 7]]
 > :math.sin :math.pi
+
+
+Range
+> r = 4..20
+> first..last = r  # -> first is 4, last is 20
+> Enum.max r    # -> 20
+
+
+Date
+
+> {:ok, d1} = Date.new(2019, 1, 3)
+> Date.day_of_week(d1)  # -> 4
+> Date.add d1, 7        # -> ~D[2019-01-10]
+
+> d2 = ~D[2019-01-03]   # This requires proper format, ~D[2019-1-3] will give error
+> d2 == d1
+
+> d3 = Date.add d2, 10
+> date_range = Date.range(d3, d2)
+> Enum.count date_range             # -> 11
+
+> ~D[2019-01-05] in date_range      # -> true
+
+
+Time
+
+> {:ok, t1} = Time.new(8, 40, 40)
+> t2 = ~T[08:40:40]
+> Time.add t1, 120   # -> ~T[08:42:40.000000]   # 120 is in seconds default
+> Time.add t1, 120000, :milliseconds    # -> ~T[08:42:40.000000]
+
+Datetime and NaiveDateTime
+# TODO - Complete the usage
