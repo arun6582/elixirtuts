@@ -88,12 +88,18 @@ OR
 > l = [a: 1, b: 2, a: 3, a: 4]
 > Keyword.get_values l, :a   #-> [1, 3, 4]
 
+- In operator
+> {:a, 1} in [a: 1, b: 2]  #-> true
+
 Maps (key-value pairs) %{ key => value, key => value }
 
 - Behave like normal python dictionaries (unique keys, all possible types)
 
 > states = %{ "AL" => "Alabama", "WI" => "Wisconsin" }
 > states["AL"]
+
+- In operator
+> {"AL", "Alabama"} in states  # -> true
 
 - If keys are atoms:
 > status = %{:success => 200, :not_found => 404}
@@ -150,8 +156,19 @@ Char "list" (single quotes)
 Functions:
 - Anonymous functions:
 
+fn
+    parameter-list -> body
+    parameter-list -> body
+    parameter-list -> body
+end
+
 > x = fn(a, b) -> a * b end
+OR (without parenthesis)
+> x = fn a,b -> a * b
 > x.(3, 2) -> 6  # dot operator to call anonymous functions
+
+> swap = fn {a, b} -> {b, a} end
+> swap.({1, 10})    #->  {10, 1}
 
 
 Operators:
@@ -165,7 +182,7 @@ rem for remainder
 - Set Substraction
 > [1, 2, 3, 4] -- [3, 4, 5, 6]  -> [1, 2]
 
-- In (only on lists, not tuples)
+- In Operator (only on lists, not tuples)
 > 1 in [1, 2, 3, 4]
 
 - String Concatenation
@@ -445,3 +462,32 @@ Time
 
 Datetime and NaiveDateTime
 # TODO - Complete the usage
+
+
+With block
+- Helps in creating a local scope, so temporary variables do not pollute global scope. E.g.
+
+content = "Now is the time"
+lp =
+    with {:ok, file} = File.open("/etc/passwd"),
+        content = IO.read(file, :all),
+        :ok = File.close(file),
+        [_, uid, gid] = Regex.run(~r/^_lp:.*?:(\d+):(\d+)/m, content)           # -> = can be replaced by <- (see below)
+        do
+            "Group: #{gid}, User: #{uid}"
+        end
+
+- With can also return nil instead of "Matching Error" e.g.
+> result = with {[1, 2, 3], :rane} = {[1, 2, 3], :rane}, do: :success           # -> result now equals :success
+> result = with {[1, 2, 3, 4], :rane} = {[1, 2, 3], :rane}, do: :success        # -> MatchError
+> result = with {[1, 2, 3, 4], :rane} <- {[1, 2, 3], :rane}, do: :success       # -> result now equal nil, no MatchError raised
+
+- With Better indentation
+lp =
+    with (
+        {:ok, file} = File.open("/etc/passwd"),
+        content = IO.read(file, :all),
+        :ok = File.close(file),
+        [_, uid, gid] <- Regex.run(~r/^_lp:.*?:(\d+):(\d+)/m, content)
+    )
+    do: "Group: #{gid}, User: #{uid}"
