@@ -50,6 +50,25 @@ Functional aspects of language
 > Enum.map [1,2,3,4,5], fn n -> n * 2 end
 
 Note:
+- In case of a closure, you might want to pin the variable for a match. use the ^variable notation
 
+& shortcuts
+
+> add_one = &(&1 + 1)       # -> same as add_one = fn (n) -> n + 1 end
+> multipler = &(&1 * &2)    # -> &1 means the first param, &2 means second param and so on
+
+> divrem = &{ div(&1, &2), rem(&1, &2) }  # -> tuples as functions
+> divrem.(19, 4)    # -> {4, 3}
+
+> divrem = &[ div(&1, &2), rem(&1, &2) ]  # -> List as functions
+> divrem.(19, 4)    # -> [4, 3]
+
+> s = &"bacon and #{&1}"    # -> String as functions
+> s.("custard")     # -> bacon and custard"
+
+> if_ends_with = &~r/.*#{&1}$/
+> res = "cat" =~ if_ends_with.("t")   # -> true
+
+> Enum.map [1,2,3,4], &(&1 * 2)  # -> [2, 4, 6, 8]
 
 
