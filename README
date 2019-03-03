@@ -58,6 +58,9 @@ List:
 > [head | tail ] = [1, 2, 3, 4, 5, 6, 7]   ->  head = 1 and rest of it is tail
 > length [head | tail]  ->  6  #  head should be a single element, tail must be a list
 
+- Head and tail separation can be done after many elements too:
+> [1,2,3,4 | [5,6,7]] == [1,2,3,4,5,6,7]
+
 - Enum and List module provides utilities for Enumerables (doesn't work on tuples)
 > Enum.at [10, 20, 30], 0  ->  10
 > List.flatten [1, 2, [3, 4, [5, 6]], [7]]  ->  [1, 2, 3, 4, 5, 6, 7]
@@ -312,7 +315,13 @@ Pattern matching:
 - Basically, this acts as an assertion
 
 - Note: Use underscore to ignore values (just like python)
+- Note: If a variable is unused, elixir raises a Warning, which can be gotten rid of by starting the variable name with underscore
 > [h | _] = [10, 20, 30, 40]
+
+- The following code warns that head is not used
+def len([ head | tail ]), do: 1 + len(tail)
+- We can fix it with underscore as
+def len([ _head | tail ]), do: 1 + len(tail)
 
 - Note: Function calls are not allowed on LHS of match
 
@@ -350,6 +359,10 @@ end
             end
 
         # When used as Guards, errors are not raised
+
+NOTE: Guards should be used to put a validation/constraint on arguments
+NOTE: Must not have complicated conditions or logic
+NOTE: Use guards to pass different types to a function (list, tuple, int) and derive different behavior
 
 Functions:
 

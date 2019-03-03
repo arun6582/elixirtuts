@@ -164,6 +164,28 @@ defmodule Rane do
     end
 end
 
+- Square all elements of a list
+
+    def square([]), do: []
+    def square([h | t ]), do: [ h * h | square(t)]
+
+
+- Creating a map function
+
+    defmodule Rane do
+        def mymap(func, []), do: []
+        def mymap(func, [h | t]), do: [func.(h) | mymap(func, t)]
+    end
+
+> Rane.mymap(&(&1 * 2), [1, 2, 3, 4])   # -> [1, 4, 9, 16]
+
+
+- Creating a reduce function
+
+    def reduce([], value, _), do: value
+    def reduce([head | tail], value, func), do: reduce(tail, func.(head, value), func)
+
+
 - The Enum module already implements functional stuff like map, reduce, filter etc.
 > Enum.reduce([1, 2, 3], 0, fn(x, acc) -> x + acc end)
 
@@ -209,4 +231,31 @@ end
     - @moduledoc (documentation of module)
     - @doc (documentation of function or macro)
 
+- Custom attributes
+    defmodule Example do
+        @author "Dave Thomas"
+        def get_author do
+            @author
+        end
+    end
+IO.puts "Example was written by #{Example.get_author}"
 
+Pipe Operator
+
+- In functional programming, chaining is a very critical design pattern, so code often looks like
+> filing = prepare_filing(sales_tax(Orders.for_customers(DB.find_customers), 2018))
+
+OR
+
+> people = DB.find_customers
+> orders = Orders.for_customers(people)
+> tax = sales_tax(orders, 2018)
+> filing = prepare_filing(tax)
+
+- Elixir gives a syntax sugar on it:
+> filing = DB.find_customers
+>   |> Orders.for_customers
+>   |> sales_tax(2018)
+>   |> prepare_filing
+
+> (1..10) |> Enum.map(&(&1*&1)) |> Enum.filter(&(&1 < 40))
