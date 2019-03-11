@@ -95,6 +95,15 @@ end
 > Math.zero?(3)  # false
 > Math.zero?('a') # FunctionClauseError
 
+Note: Pattern matching can be used in clever ways e.g.
+
+defmodule Clever do
+    def square(n, n), do n*n
+end
+
+> Clever.square(5, 6)   # -> Error, this function will take same parameters
+> Clever.square(5, 5)   # -> 25
+
 
 - Default arguments
 
@@ -185,6 +194,30 @@ end
     def reduce([], value, _), do: value
     def reduce([head | tail], value, func), do: reduce(tail, func.(head, value), func)
 
+- Lets pattern match a list of list.
+    Suppose we have a list of list, each element as [idx, name, dept, age]
+    Lets write a function to filter based on dept
+
+```
+defmodule Data do
+
+    test = [[1, "Rane", "Aero", 16], [2, "Abhas", "Aero", 17], [3, "Rahul", "Chem", 16], [4, "Akhil", "Chem", 17]]
+
+    def age_filter([], dept), do: []
+    def age_filter([[idx, name, dept, age] | tail], age), do: [[idx, name, dept, age] | age_filter(tail, age)]
+    def age_filter([_ | tail], age), do: age_filter(tail, age)
+
+    age_filter(test)
+end
+```
+
+- The above works fine, but in the 2nd definition of age_filter, idx, name, age are not being used, its can be written better as
+
+```
+    def age_filter([], dept), do: []
+    def age_filter([head = [_, _, dept, _] | tail], age), do: [head | age_filter(tail, age)]
+    def age_filter([_ | tail], age), do: age_filter(tail, age)
+```
 
 - The Enum module already implements functional stuff like map, reduce, filter etc.
 > Enum.reduce([1, 2, 3], 0, fn(x, acc) -> x + acc end)
