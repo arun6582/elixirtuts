@@ -232,8 +232,8 @@ Pattern matching:
 - number of parameters have to be same on both sides
 - Interesting use is to match function output as :ok or :error e.g.
 
-> {:ok, result} = {:ok, 3}  -> when function given output
-> {:ok, result} = {:error, :bad_input}  ->  when function given error
+> {:ok, result} = {:ok, 3}  -> when function gives output
+> {:error, result} = {:error, :bad_input}  ->  when function gives error
 
 - String pattern matching
 > [a, b, c] = "ran"  -> a,b,c get ascii codes for 'r', 'a', 'n' respectively
